@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+
+    - name: Run Test Suite
+      run: |
+        pytest -v
+
+    - name: Run EGFR Gefitinib Docking Example
+      run: |
+        python examples/egfr_kinase_gefitinib_docking.py
+
+    - name: Run EGFR T790M Drug Resistance Assay Example
+      run: |
+        python examples/egfr_t790m_resistance_mutation_assay.py
